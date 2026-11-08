@@ -1,0 +1,144 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono, insignia_modalidad %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<section class="portada">
+    <div class="portada__texto">
+        <p class="etiqueta">Microframework Flask · Python 3</p>
+        <h1>{{ data.bienvenida }} Bienvenido a {{ nombre_app }}</h1>
+        <p class="portada__descripcion">
+            Sistema web para registrar, consultar, actualizar y eliminar cursos académicos. Integra cada
+            concepto del tutorial de Flask: rutas y vistas, plantillas Jinja2, archivos estáticos, URLs
+            dinámicas, query strings, manejo de errores, hooks de petición y conexión a bases de datos
+            PostgreSQL y MySQL.
+        </p>
+        <div class="acciones">
+            <a class="boton boton--primario" href="{{ url_for('cursos.listar') }}">{{ icono('libro') }} Ver cursos</a>
+            <a class="boton boton--acento" href="{{ url_for('cursos.crear') }}">{{ icono('mas') }} Registrar curso</a>
+            <a class="boton boton--secundario" href="{{ url_for('principal.acerca') }}">Relación con el video</a>
+        </div>
+    </div>
+    <div class="portada__ilustracion" aria-hidden="true">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="220" height="220">
+    </div>
+</section>
+
+{% if data.estadisticas %}
+<section class="estadisticas" aria-label="Resumen de la base de datos">
+    <article class="dato">
+        <span class="dato__valor">{{ data.estadisticas.total_cursos }}</span>
+        <span class="dato__texto">Cursos registrados</span>
+    </article>
+    <article class="dato">
+        <span class="dato__valor">{{ data.estadisticas.total_creditos }}</span>
+        <span class="dato__texto">Créditos ofertados</span>
+    </article>
+    <article class="dato">
+        <span class="dato__valor">{{ data.estadisticas.promedio_creditos }}</span>
+        <span class="dato__texto">Créditos por curso (promedio)</span>
+    </article>
+    <article class="dato">
+        <span class="dato__valor">{{ data.estadisticas.por_modalidad|length }}</span>
+        <span class="dato__texto">Modalidades de estudio</span>
+    </article>
+</section>
+{% else %}
+<div class="aviso aviso--advertencia">
+    <strong>No se pudo conectar con la base de datos {{ nombre_motor_bd }}.</strong>
+    {% if motor_bd == 'postgresql' %}
+    Verifique que el servicio de PostgreSQL esté iniciado y escriba en el archivo <code>.env</code> la contraseña
+    del usuario <code>postgres</code> (<code>POSTGRES_PASSWORD</code>) y el nombre de la base
+    (<code>POSTGRES_DB=Tarea_Flask</code>).
+    {% else %}
+    Inicie el servicio de MySQL en XAMPP, importe <code>database/abaco_mysql.sql</code> y revise las
+    credenciales del archivo <code>.env</code>.
+    {% endif %}
+    También puede usar <code>DB_MOTOR=sqlite</code> para trabajar sin servidor.
+</div>
+{% endif %}
+
+<div class="rejilla-2">
+    <section class="tarjeta">
+        <h2>Lenguajes del tutorial</h2>
+        <p class="texto-suave">
+            Lista enviada desde la vista <code>index</code> dentro del diccionario <code>data</code> y recorrida
+            con un bucle <code>for</code> de Jinja2, tal como en el video.
+        </p>
+        {% if data.numero_cursos > 0 %}
+        <ul class="chips">
+            {% for c in data.cursos %}
+            <li>{{ c }}</li>
+            {% endfor %}
+        </ul>
+        <p class="texto-suave">Total de elementos: {{ data.numero_cursos }}</p>
+        {% else %}
+        <h2>No existen cursos...</h2>
+        {% endif %}
+    </section>
+
+    <section class="tarjeta">
+        <h2>Cursos registrados recientemente</h2>
+        {% if data.recientes %}
+        <ul class="lista-simple">
+            {% for curso in data.recientes %}
+            <li>
+                <span>
+                    <a href="{{ url_for('cursos.detalle', codigo=curso.codigo) }}"><strong>{{ curso.nombre }}</strong></a><br>
+                    <small class="texto-suave"><span class="codigo-curso">{{ curso.codigo }}</span> · {{ curso.creditos|creditos }}</small>
+                </span>
+                {{ insignia_modalidad(curso.modalidad) }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="texto-suave">Todavía no hay cursos registrados.</p>
+        {% endif %}
+    </section>
+</div>
+
+{% if data.estadisticas and data.estadisticas.por_modalidad %}
+<section class="tarjeta">
+    <h2>Distribución de cursos por modalidad</h2>
+    <div class="barras">
+        {% for fila in data.estadisticas.por_modalidad %}
+        {% set porcentaje = (fila.cantidad / data.estadisticas.total_cursos * 100)|round(1) %}
+        <div class="barras__fila">
+            <span>{{ fila.modalidad }}</span>
+            <span class="barras__pista"><span class="barras__relleno" style="width: {{ porcentaje }}%"></span></span>
+            <span class="barras__valor">{{ fila.cantidad }} ({{ porcentaje }} %)</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<h2 class="titulo-seccion">Explore lo aprendido en el video</h2>
+<div class="rejilla-3">
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('principal.contacto', nombre='Oscar', edad=28) }}">
+        <h3>URL dinámica</h3>
+        <p>Parámetros en la ruta: <code>/contacto/Oscar/28</code></p>
+    </a>
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('principal.query_string', param1='Jose', param2=39) }}">
+        <h3>Query string</h3>
+        <p>Lectura de <code>request.args</code>: <code>?param1=Jose&amp;param2=39</code></p>
+    </a>
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('principal.listar_cursos') }}">
+        <h3>Respuesta JSON</h3>
+        <p>Cursos de la base de datos con <code>jsonify</code> en <code>/cursos</code></p>
+    </a>
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('api.documentacion') }}">
+        <h3>API REST</h3>
+        <p>Verbos GET, POST, PUT y DELETE sobre <code>/api/cursos</code></p>
+    </a>
+    <a class="tarjeta tarjeta--enlace" href="/formulario">
+        <h3>Error 404 personalizado</h3>
+        <p>Una ruta inexistente muestra la plantilla <code>404.html</code></p>
+    </a>
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('principal.inicio') }}">
+        <h3>Redirección</h3>
+        <p><code>/inicio</code> redirige a la raíz con <code>redirect(url_for(...))</code></p>
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+# =====================================================================
+# Dependencias de la aplicación «Ábaco - Gestión de Cursos»
+# Versiones exactas probadas con Python 3.12.10 en Windows 11.
+# Instalación:  pip install -r requirements.txt
+# =====================================================================
+
+# Microframework web y sus dependencias directas
+Flask==3.1.3
+Werkzeug==3.1.9
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+itsdangerous==2.2.0
+click==8.5.0
+blinker==1.9.0
+colorama==0.4.6 ; platform_system == "Windows"
+
+# Conexión a PostgreSQL (motor de base de datos principal del proyecto)
+psycopg[binary]==3.3.6
+psycopg-binary==3.3.6
+psycopg-pool==3.3.2
+typing_extensions==4.16.0 ; python_version < "3.13"
+tzdata==2026.5 ; platform_system == "Windows"
+
+# Conexión a MySQL / MariaDB (la misma extensión usada en el video)
+Flask-MySQLdb==2.0.0
+mysqlclient==2.2.8
+
+# Formularios con validación y protección CSRF
+Flask-WTF==1.3.0
+WTForms==3.2.2
+
+# Lectura de variables de entorno desde el archivo .env
+python-dotenv==1.2.2
+
+# Servidor WSGI para producción (opcional)
+waitress==3.0.2

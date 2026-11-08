@@ -1,0 +1,59 @@
+{% extends './layout.html' %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">request.args</p>
+        <h1>Query String</h1>
+        <p class="texto-suave">
+            Parámetros enviados después del signo <code>?</code> de la URL. Esta ruta se registró sin decorador,
+            con <code>add_url_rule('/query_string', view_func=query_string)</code>.
+        </p>
+    </div>
+</div>
+
+<div class="rejilla-2">
+    <section class="tarjeta">
+        <h2>Datos de la petición</h2>
+        <dl class="detalle detalle--compacto">
+            <div><dt>Método HTTP</dt><dd>{{ data.metodo }}</dd></div>
+            <div><dt>Ruta</dt><dd><code>{{ data.ruta }}</code></dd></div>
+            <div class="detalle__completo"><dt>URL solicitada</dt><dd><code>{{ data.url_completa }}</code></dd></div>
+            <div><dt>request.args.get('param1')</dt><dd>{{ data.param1 if data.param1 is not none else 'None' }}</dd></div>
+            <div><dt>request.args.get('param2')</dt><dd>{{ data.param2 if data.param2 is not none else 'None' }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Parámetros recibidos ({{ data.parametros|length }})</h2>
+        {% if data.parametros %}
+        <div class="tabla-contenedor tabla-contenedor--simple">
+            <table class="tabla tabla--compacta">
+                <thead>
+                    <tr><th scope="col">Clave</th><th scope="col">Valor</th></tr>
+                </thead>
+                <tbody>
+                    {% for clave, valor in data.parametros %}
+                    <tr><td><code>{{ clave }}</code></td><td>{{ valor }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="texto-suave">La URL no contiene parámetros. Pruebe alguno de los ejemplos.</p>
+        {% endif %}
+    </section>
+</div>
+
+<section class="tarjeta">
+    <h2>Ejemplos</h2>
+    <ul class="lista-enlaces">
+        <li><a href="{{ url_for('principal.query_string', param1='Jose') }}">/query_string?param1=Jose</a></li>
+        <li><a href="{{ url_for('principal.query_string', param1='Jose', param2=39) }}">/query_string?param1=Jose&amp;param2=39</a></li>
+        <li><a href="{{ url_for('principal.query_string', curso='Flask', nivel='basico', pagina=2) }}">/query_string?curso=Flask&amp;nivel=basico&amp;pagina=2</a></li>
+    </ul>
+    <p class="texto-suave">Igual que en el video, los valores también se imprimen en la consola donde se ejecuta el servidor.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">JSON · HTTP</p>
+        <h1>API REST de cursos</h1>
+        <p class="texto-suave">
+            Servicio web que intercambia datos en formato JSON y aplica los verbos HTTP GET, POST, PUT y DELETE
+            mencionados en el video. Comparte las mismas validaciones que los formularios HTML.
+        </p>
+    </div>
+</div>
+
+<section class="tarjeta">
+    <h2>Endpoints disponibles</h2>
+    <div class="tabla-contenedor tabla-contenedor--simple">
+        <table class="tabla tabla--compacta">
+            <thead>
+                <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col">Ruta</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Códigos HTTP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="metodo metodo--get">GET</span></td>
+                    <td><code>/cursos</code></td>
+                    <td>Endpoint original del video: código, nombre y créditos ordenados por nombre.</td>
+                    <td>200, 503</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--get">GET</span></td>
+                    <td><code>/api/cursos</code></td>
+                    <td>Lista completa. Filtros opcionales: <code>q</code>, <code>modalidad</code>, <code>orden</code> y <code>dir</code>.</td>
+                    <td>200</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--get">GET</span></td>
+                    <td><code>/api/cursos/&lt;codigo&gt;</code></td>
+                    <td>Obtiene un curso por su código.</td>
+                    <td>200, 404</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--post">POST</span></td>
+                    <td><code>/api/cursos</code></td>
+                    <td>Crea un curso a partir de un cuerpo JSON.</td>
+                    <td>201, 400, 409, 422</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--put">PUT</span></td>
+                    <td><code>/api/cursos/&lt;codigo&gt;</code></td>
+                    <td>Reemplaza los datos de un curso (el código no cambia).</td>
+                    <td>200, 400, 404, 422</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--delete">DELETE</span></td>
+                    <td><code>/api/cursos/&lt;codigo&gt;</code></td>
+                    <td>Elimina un curso.</td>
+                    <td>200, 404</td>
+                </tr>
+                <tr>
+                    <td><span class="metodo metodo--get">GET</span></td>
+                    <td><code>/api/estadisticas</code></td>
+                    <td>Total de cursos, créditos y distribución por modalidad.</td>
+                    <td>200</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="tarjeta">
+    <h2>Consola de pruebas</h2>
+    <p class="texto-suave">Elija un ejemplo o escriba su propia petición. La consola envía la petición con <code>fetch()</code> de JavaScript.</p>
+    <div class="ejemplos">
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="GET" data-ruta="/api/cursos">GET lista</button>
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="GET" data-ruta="/api/cursos/WEB201">GET WEB201</button>
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="POST" data-ruta="/api/cursos"
+            data-cuerpo='{"codigo": "IAR401", "nombre": "Inteligencia Artificial", "creditos": 4, "docente": "Elena Castro Ruiz", "modalidad": "Virtual", "descripcion": "Aprendizaje automático y redes neuronales con Python."}'>POST nuevo curso</button>
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="PUT" data-ruta="/api/cursos/IAR401"
+            data-cuerpo='{"nombre": "Inteligencia Artificial Aplicada", "creditos": 5, "docente": "Elena Castro Ruiz", "modalidad": "Híbrida", "descripcion": "Modelos de aprendizaje automático aplicados a casos reales."}'>PUT IAR401</button>
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="DELETE" data-ruta="/api/cursos/IAR401">DELETE IAR401</button>
+        <button type="button" class="boton boton--secundario boton--pequeno" data-ejemplo data-metodo="GET" data-ruta="/api/estadisticas">GET estadísticas</button>
+    </div>
+
+    <form id="consola-api" class="consola">
+        <div class="consola__fila">
+            <label class="sr-only" for="metodo">Método HTTP</label>
+            <select id="metodo" class="campo__control">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+            </select>
+            <label class="sr-only" for="ruta">Ruta</label>
+            <input id="ruta" class="campo__control" value="/api/cursos" required pattern="/.*">
+            <button class="boton boton--primario" type="submit">{{ icono('enviar') }} Enviar</button>
+        </div>
+        <label class="campo__etiqueta" for="cuerpo">Cuerpo JSON (solo para POST y PUT)</label>
+        <textarea id="cuerpo" class="campo__control campo__control--codigo" rows="9" spellcheck="false"></textarea>
+    </form>
+
+    <p class="respuesta-cabecera">Respuesta: <span id="respuesta-estado" class="respuesta-estado">—</span></p>
+    <pre id="respuesta-cuerpo" class="respuesta">Pulse «Enviar» para ver la respuesta del servidor.</pre>
+</section>
+
+<section class="tarjeta">
+    <h2>Ejemplo desde la terminal (curl)</h2>
+    <pre class="bloque-codigo">curl -X POST http://127.0.0.1:5000/api/cursos -H "Content-Type: application/json" -d "{\"codigo\": \"IAR401\", \"nombre\": \"Inteligencia Artificial\", \"creditos\": 4, \"docente\": \"Elena Castro Ruiz\", \"modalidad\": \"Virtual\"}"</pre>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+{% endblock %}

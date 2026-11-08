@@ -1,0 +1,49 @@
+{#
+  macros.html - Fragmentos reutilizables de Jinja2 (equivalentes a funciones).
+  Se importan con: {% from 'macros.html' import campo, icono %}
+#}
+
+{# Ícono SVG en línea (trazos propios, sin dependencias externas). #}
+{% macro icono(nombre, tamano=18) -%}
+{%- set trazos = {
+    'menu': '<path d="M3 6h18M3 12h18M3 18h18"/>',
+    'buscar': '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    'mas': '<path d="M12 5v14M5 12h14"/>',
+    'editar': '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    'eliminar': '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/>',
+    'ver': '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/>',
+    'volver': '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+    'libro': '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>',
+    'codigo': '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    'enlace': '<path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>',
+    'inicio': '<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/>',
+    'filtro': '<path d="M22 3H2l8 9.46V19l4 2v-8.54Z"/>',
+    'enviar': '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+} -%}
+<svg class="icono" width="{{ tamano }}" height="{{ tamano }}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{{ trazos[nombre]|safe }}</svg>
+{%- endmacro %}
+
+
+{# Campo de formulario WTForms con etiqueta, ayuda y mensajes de error. #}
+{% macro campo(field, ayuda=None) -%}
+<div class="campo{% if field.errors %} campo--error{% endif %}">
+    <label class="campo__etiqueta" for="{{ field.id }}">{{ field.label.text }}{% if field.flags.required %}<span class="campo__requerido" aria-hidden="true"> *</span>{% endif %}</label>
+    {% if ayuda %}
+    {{ field(class_='campo__control', **{'aria-describedby': field.id ~ '-ayuda'}) }}
+    <small class="campo__ayuda" id="{{ field.id }}-ayuda">{{ ayuda }}</small>
+    {% else %}
+    {{ field(class_='campo__control') }}
+    {% endif %}
+    {% for error in field.errors %}
+    <small class="campo__mensaje-error" role="alert">{{ error }}</small>
+    {% endfor %}
+</div>
+{%- endmacro %}
+
+
+{# Insignia de color según la modalidad del curso. #}
+{% macro insignia_modalidad(modalidad) -%}
+{%- set clases = {'Presencial': 'presencial', 'Virtual': 'virtual', 'Híbrida': 'hibrida'} -%}
+<span class="insignia insignia--{{ clases.get(modalidad, 'presencial') }}">{{ modalidad }}</span>
+{%- endmacro %}

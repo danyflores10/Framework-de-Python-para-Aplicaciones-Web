@@ -1,0 +1,40 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono, insignia_modalidad %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<nav class="migas" aria-label="Ruta de navegación">
+    <a href="{{ url_for('cursos.listar') }}">Cursos</a> <span aria-hidden="true">/</span> <span>{{ curso.codigo }}</span>
+</nav>
+
+<section class="tarjeta">
+    <div class="encabezado-pagina encabezado-pagina--tarjeta">
+        <div>
+            <p class="etiqueta">Detalle del curso</p>
+            <h1>{{ curso.nombre }}</h1>
+            <p class="detalle__subtitulo"><span class="codigo-curso">{{ curso.codigo }}</span> {{ insignia_modalidad(curso.modalidad) }}</p>
+        </div>
+        <div class="acciones">
+            <a class="boton boton--primario" href="{{ url_for('cursos.editar', codigo=curso.codigo) }}">{{ icono('editar') }} Editar</a>
+            <form method="post" action="{{ url_for('cursos.eliminar', codigo=curso.codigo) }}"
+                data-confirmar="¿Desea eliminar el curso «{{ curso.nombre }}»? Esta acción no se puede deshacer.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="boton boton--peligro">{{ icono('eliminar') }} Eliminar</button>
+            </form>
+        </div>
+    </div>
+
+    <dl class="detalle">
+        <div><dt>Código</dt><dd>{{ curso.codigo }}</dd></div>
+        <div><dt>Créditos</dt><dd>{{ curso.creditos|creditos }}</dd></div>
+        <div><dt>Docente</dt><dd>{{ curso.docente }}</dd></div>
+        <div><dt>Modalidad</dt><dd>{{ curso.modalidad }}</dd></div>
+        <div><dt>Fecha de registro</dt><dd>{{ curso.fecha_registro|fecha }}</dd></div>
+        <div><dt>Representación JSON</dt><dd><a href="{{ url_for('api.obtener_curso', codigo=curso.codigo) }}">/api/cursos/{{ curso.codigo }}</a></dd></div>
+        <div class="detalle__completo"><dt>Descripción</dt><dd>{{ curso.descripcion or 'Sin descripción registrada.' }}</dd></div>
+    </dl>
+</section>
+
+<a class="boton boton--secundario" href="{{ url_for('cursos.listar') }}">{{ icono('volver') }} Volver al listado</a>
+{% endblock %}

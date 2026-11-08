@@ -1,0 +1,18 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono %}
+
+{# En el video esta plantilla usaba un título fijo porque la vista del error
+   no envía el diccionario «data». Se mantiene el mismo criterio. #}
+{% block title %}Página no encontrada{% endblock %}
+
+{% block body %}
+<section class="tarjeta error-pagina">
+    <p class="error-pagina__codigo">404</p>
+    <h1>¡Oops! La página que buscas no existe</h1>
+    <p class="texto-suave">La ruta <code>{{ request.path }}</code> no está definida en la aplicación.</p>
+    <div class="acciones acciones--centradas">
+        <a class="boton boton--primario" href="{{ url_for('principal.index') }}">{{ icono('inicio') }} Ir al inicio</a>
+        <a class="boton boton--secundario" href="{{ url_for('cursos.listar') }}">{{ icono('libro') }} Ver cursos</a>
+    </div>
+</section>
+{% endblock %}

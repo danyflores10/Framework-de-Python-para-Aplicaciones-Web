@@ -1,0 +1,26 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<section class="tarjeta tarjeta--centrada">
+    <p class="etiqueta">URL dinámica: /contacto/&lt;nombre&gt;/&lt;int:edad&gt;</p>
+    <h1>{{ data.nombre }}</h1>
+    <h2>Tu edad es: {{ data.edad }}</h2>
+    {% if data.edad >= 18 %}
+    <p class="texto-suave">Según la edad recibida en la URL, eres mayor de edad.</p>
+    {% else %}
+    <p class="texto-suave">Según la edad recibida en la URL, eres menor de edad.</p>
+    {% endif %}
+
+    <p>Cada combinación de parámetros genera una página distinta sin crear una ruta nueva:</p>
+    <ul class="lista-enlaces lista-enlaces--centrada">
+        <li><a href="{{ url_for('principal.contacto', nombre='Karen', edad=31) }}">/contacto/Karen/31</a></li>
+        <li><a href="{{ url_for('principal.contacto', nombre='Pedro', edad=17) }}">/contacto/Pedro/17</a></li>
+    </ul>
+    <div class="acciones acciones--centradas">
+        <a class="boton boton--secundario" href="{{ url_for('principal.contacto_formulario') }}">{{ icono('volver') }} Volver al formulario</a>
+    </div>
+</section>
+{% endblock %}

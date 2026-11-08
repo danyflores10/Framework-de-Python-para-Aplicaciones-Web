@@ -1,0 +1,50 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import campo, icono %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+{% set url_volver = url_for('cursos.listar') if modo == 'crear' else url_for('cursos.detalle', codigo=curso.codigo) %}
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">{{ 'Crear · método POST' if modo == 'crear' else 'Actualizar · método POST' }}</p>
+        <h1>{{ 'Registrar curso' if modo == 'crear' else 'Editar curso' }}</h1>
+        <p class="texto-suave">
+            {% if modo == 'crear' %}
+            Complete los datos del nuevo curso. Los campos marcados con * son obligatorios.
+            {% else %}
+            Modifique los datos del curso <span class="codigo-curso">{{ curso.codigo }}</span>. El código no se
+            puede cambiar porque es la clave primaria de la tabla.
+            {% endif %}
+        </p>
+    </div>
+    <a class="boton boton--secundario" href="{{ url_volver }}">{{ icono('volver') }} Volver</a>
+</div>
+
+<section class="tarjeta">
+    <form class="formulario" method="post" novalidate>
+        {{ formulario.hidden_tag() }}
+        <div class="formulario__fila">
+            {% if modo == 'crear' %}
+            {{ campo(formulario.codigo, '3 letras y 3 números, por ejemplo WEB201.') }}
+            {% else %}
+            <div class="campo">
+                <span class="campo__etiqueta">Código</span>
+                <span class="campo__control campo__control--solo-lectura">{{ curso.codigo }}</span>
+            </div>
+            {% endif %}
+            {{ campo(formulario.nombre) }}
+        </div>
+        <div class="formulario__fila formulario__fila--3">
+            {{ campo(formulario.docente) }}
+            {{ campo(formulario.creditos, 'Número entero entre 1 y 10.') }}
+            {{ campo(formulario.modalidad) }}
+        </div>
+        {{ campo(formulario.descripcion, 'Opcional. Máximo 500 caracteres.') }}
+        <div class="acciones">
+            <button type="submit" class="boton boton--primario">{{ formulario.enviar.label.text }}</button>
+            <a class="boton boton--texto" href="{{ url_volver }}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

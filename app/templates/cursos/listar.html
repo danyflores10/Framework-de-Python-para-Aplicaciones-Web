@@ -1,0 +1,145 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono, insignia_modalidad %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+{# Encabezado de columna que permite ordenar la tabla (query string ?orden=...&dir=...). #}
+{% macro encabezado_orden(columna, etiqueta, clase='') -%}
+{%- set activa = filtros.orden == columna -%}
+{%- set siguiente = 'desc' if activa and filtros.dir == 'asc' else 'asc' -%}
+<th scope="col" class="{{ clase }}" {% if activa %}aria-sort="{{ 'ascending' if filtros.dir == 'asc' else 'descending' }}"{% endif %}>
+    <a href="{{ url_listado(orden=columna, dir=siguiente, pagina=1) }}" title="Ordenar por {{ etiqueta|lower }}">{{ etiqueta }}{% if activa %} <span aria-hidden="true">{{ '▲' if filtros.dir == 'asc' else '▼' }}</span>{% endif %}</a>
+</th>
+{%- endmacro %}
+
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">CRUD · Jinja2 · Query string</p>
+        <h1>Cursos</h1>
+        <p class="texto-suave">
+            {{ total }} curso{{ 's' if total != 1 }} encontrado{{ 's' if total != 1 }}{% if filtros.q %} para «{{ filtros.q }}»{% endif %}{% if filtros.modalidad %} en modalidad {{ filtros.modalidad }}{% endif %}.
+        </p>
+    </div>
+    <a class="boton boton--acento" href="{{ url_for('cursos.crear') }}">{{ icono('mas') }} Registrar curso</a>
+</div>
+
+<form class="tarjeta filtros" method="get" action="{{ url_for('cursos.listar') }}" role="search">
+    <div class="campo">
+        <label class="campo__etiqueta" for="q">Buscar</label>
+        <input class="campo__control" type="search" id="q" name="q" value="{{ filtros.q }}" maxlength="60"
+            placeholder="Código, nombre o docente">
+    </div>
+    <div class="campo">
+        <label class="campo__etiqueta" for="modalidad">Modalidad</label>
+        <select class="campo__control" id="modalidad" name="modalidad">
+            <option value="">Todas</option>
+            {% for m in modalidades %}
+            <option value="{{ m }}" {% if filtros.modalidad == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label class="campo__etiqueta" for="orden">Ordenar por</label>
+        <select class="campo__control" id="orden" name="orden">
+            {% for valor, etiqueta in [('nombre', 'Nombre'), ('codigo', 'Código'), ('creditos', 'Créditos'),
+                                        ('docente', 'Docente'), ('modalidad', 'Modalidad'), ('fecha_registro', 'Fecha de registro')] %}
+            <option value="{{ valor }}" {% if filtros.orden == valor %}selected{% endif %}>{{ etiqueta }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label class="campo__etiqueta" for="dir">Dirección</label>
+        <select class="campo__control" id="dir" name="dir">
+            <option value="asc" {% if filtros.dir == 'asc' %}selected{% endif %}>Ascendente</option>
+            <option value="desc" {% if filtros.dir == 'desc' %}selected{% endif %}>Descendente</option>
+        </select>
+    </div>
+    <div class="filtros__acciones">
+        <button class="boton boton--primario" type="submit">{{ icono('buscar') }} Buscar</button>
+        {% if filtros.q or filtros.modalidad or filtros.orden != 'nombre' or filtros.dir != 'asc' %}
+        <a class="boton boton--texto" href="{{ url_for('cursos.listar') }}">Limpiar</a>
+        {% endif %}
+    </div>
+</form>
+
+{% if cursos %}
+<div class="tabla-contenedor">
+    <table class="tabla">
+        <caption class="sr-only">Listado de cursos registrados</caption>
+        <thead>
+            <tr>
+                {{ encabezado_orden('codigo', 'Código') }}
+                {{ encabezado_orden('nombre', 'Nombre del curso') }}
+                {{ encabezado_orden('creditos', 'Créditos', 'numero') }}
+                {{ encabezado_orden('docente', 'Docente') }}
+                {{ encabezado_orden('modalidad', 'Modalidad') }}
+                <th scope="col" class="derecha">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for curso in cursos %}
+            <tr>
+                <td><span class="codigo-curso">{{ curso.codigo }}</span></td>
+                <td><a href="{{ url_for('cursos.detalle', codigo=curso.codigo) }}">{{ curso.nombre }}</a></td>
+                <td class="numero">{{ curso.creditos }}</td>
+                <td>{{ curso.docente }}</td>
+                <td>{{ insignia_modalidad(curso.modalidad) }}</td>
+                <td>
+                    <div class="tabla__acciones">
+                        <a class="boton boton--secundario boton--pequeno" href="{{ url_for('cursos.detalle', codigo=curso.codigo) }}" title="Ver detalle">
+                            {{ icono('ver', 16) }}<span class="sr-only">Ver {{ curso.nombre }}</span>
+                        </a>
+                        <a class="boton boton--secundario boton--pequeno" href="{{ url_for('cursos.editar', codigo=curso.codigo) }}" title="Editar">
+                            {{ icono('editar', 16) }}<span class="sr-only">Editar {{ curso.nombre }}</span>
+                        </a>
+                        <form method="post" action="{{ url_for('cursos.eliminar', codigo=curso.codigo) }}"
+                            data-confirmar="¿Desea eliminar el curso «{{ curso.nombre }}»? Esta acción no se puede deshacer.">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="boton boton--peligro boton--pequeno" title="Eliminar">
+                                {{ icono('eliminar', 16) }}<span class="sr-only">Eliminar {{ curso.nombre }}</span>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_paginas > 1 %}
+<nav class="paginacion" aria-label="Paginación del listado">
+    {% if pagina > 1 %}
+    <a href="{{ url_listado(pagina=pagina - 1) }}">« Anterior</a>
+    {% else %}
+    <span class="deshabilitado">« Anterior</span>
+    {% endif %}
+    {% for numero in range(1, total_paginas + 1) %}
+    {% if numero == pagina %}
+    <span class="actual" aria-current="page">{{ numero }}</span>
+    {% else %}
+    <a href="{{ url_listado(pagina=numero) }}">{{ numero }}</a>
+    {% endif %}
+    {% endfor %}
+    {% if pagina < total_paginas %}
+    <a href="{{ url_listado(pagina=pagina + 1) }}">Siguiente »</a>
+    {% else %}
+    <span class="deshabilitado">Siguiente »</span>
+    {% endif %}
+</nav>
+{% endif %}
+<p class="texto-suave texto-centrado">
+    Página {{ pagina }} de {{ total_paginas }} · Estos mismos datos en JSON:
+    <a href="{{ url_for('api.listar_cursos', q=filtros.q or None, modalidad=filtros.modalidad or None) }}">/api/cursos</a>
+</p>
+{% else %}
+<div class="tarjeta vacio">
+    <h2>No existen cursos{% if filtros.q or filtros.modalidad %} que coincidan con la búsqueda{% endif %}...</h2>
+    <p class="texto-suave">Pruebe con otro término de búsqueda o registre un curso nuevo.</p>
+    <div class="acciones acciones--centradas">
+        <a class="boton boton--acento" href="{{ url_for('cursos.crear') }}">{{ icono('mas') }} Registrar curso</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

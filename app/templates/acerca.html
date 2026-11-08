@@ -1,0 +1,78 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import icono %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">Proyecto académico</p>
+        <h1>Acerca del proyecto</h1>
+        <p class="texto-suave">
+            Aplicación construida a partir del video «Tutorial Flask: Framework de Python para Aplicaciones Web
+            (Desde Cero)» del canal UskoKruM2010 (2021). La tabla relaciona cada capítulo del video con la parte
+            del proyecto donde se aplica.
+        </p>
+    </div>
+    <a class="boton boton--secundario" href="https://www.youtube.com/watch?v=-1DmVCPB6H8" target="_blank"
+        rel="noopener noreferrer">{{ icono('enlace') }} Ver el video</a>
+</div>
+
+<section class="tarjeta">
+    <h2>Capítulos del video y su aplicación en el proyecto</h2>
+    <div class="tabla-contenedor tabla-contenedor--simple">
+        <table class="tabla tabla--compacta">
+            <thead>
+                <tr>
+                    <th scope="col">Minuto</th>
+                    <th scope="col">Tema del video</th>
+                    <th scope="col">Aplicación en el proyecto</th>
+                    <th scope="col">Demostración</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for minuto, tema, aplicacion, enlace in capitulos %}
+                <tr>
+                    <td><span class="codigo-curso">{{ minuto }}</span></td>
+                    <td><strong>{{ tema }}</strong></td>
+                    <td>{{ aplicacion }}</td>
+                    <td>{% if enlace %}<a href="{{ enlace }}">Abrir</a>{% else %}<span class="texto-suave">—</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="rejilla-2">
+    <section class="tarjeta">
+        <h2>Arquitectura del proyecto (MVC)</h2>
+        <ul class="lista-puntos">
+            <li><strong>Modelo:</strong> <code>app/modelos/curso.py</code> y <code>app/database.py</code>, con las
+                consultas SQL a PostgreSQL, MySQL o SQLite.</li>
+            <li><strong>Vista:</strong> plantillas Jinja2 de <code>app/templates</code> y recursos de
+                <code>app/static</code>.</li>
+            <li><strong>Controlador:</strong> blueprints de <code>app/rutas</code>: <code>principal</code>,
+                <code>cursos</code> y <code>api</code>.</li>
+            <li><strong>Configuración:</strong> <code>app/config.py</code> y variables del archivo <code>.env</code>.</li>
+            <li><strong>Pruebas:</strong> carpeta <code>tests</code> con pytest y el cliente de pruebas de Flask.</li>
+        </ul>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Versiones en ejecución</h2>
+        <div class="tabla-contenedor tabla-contenedor--simple">
+            <table class="tabla tabla--compacta">
+                <thead>
+                    <tr><th scope="col">Componente</th><th scope="col">Versión</th></tr>
+                </thead>
+                <tbody>
+                    {% for paquete, numero in versiones %}
+                    <tr><td>{{ paquete }}</td><td><code>{{ numero }}</code></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

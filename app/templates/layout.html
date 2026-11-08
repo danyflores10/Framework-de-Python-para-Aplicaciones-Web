@@ -1,0 +1,72 @@
+{#
+  layout.html - Plantilla base (padre) de todas las páginas.
+  Define los bloques «title», «body» y «scripts» que cada plantilla hija
+  reemplaza mediante {% extends './layout.html' %} (video: «Herencia de plantillas»).
+#}
+{% from 'macros.html' import icono %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ábaco: sistema web de gestión de cursos desarrollado con el microframework Flask de Python.">
+    <title>{% block title %}{% endblock %} | {{ nombre_app }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+</head>
+
+<body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+
+    <header class="cabecera">
+        <div class="contenedor cabecera__barra">
+            <a class="marca" href="{{ url_for('principal.index') }}">
+                <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="42" height="42">
+                <span class="marca__texto">{{ nombre_app }}<small>Gestión de Cursos</small></span>
+            </a>
+            <button class="cabecera__menu" type="button" aria-controls="navegacion" aria-expanded="false" data-menu>
+                {{ icono('menu', 22) }}<span class="sr-only">Abrir menú</span>
+            </button>
+            {% set endpoint = request.endpoint or '' %}
+            <nav class="navegacion" id="navegacion" aria-label="Navegación principal">
+                <a href="{{ url_for('principal.index') }}" {% if endpoint == 'principal.index' %}class="activo" aria-current="page"{% endif %}>Inicio</a>
+                <a href="{{ url_for('cursos.listar') }}" {% if endpoint.startswith('cursos.') %}class="activo" aria-current="page"{% endif %}>Cursos</a>
+                <a href="{{ url_for('api.documentacion') }}" {% if endpoint.startswith('api.') %}class="activo" aria-current="page"{% endif %}>API REST</a>
+                <a href="{{ url_for('principal.contacto_formulario') }}" {% if endpoint in ('principal.contacto_formulario', 'principal.contacto') %}class="activo" aria-current="page"{% endif %}>Contacto</a>
+                <a href="{{ url_for('principal.acerca') }}" {% if endpoint == 'principal.acerca' %}class="activo" aria-current="page"{% endif %}>Acerca del proyecto</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="contenido" class="contenedor principal">
+        {# Mensajes flash enviados desde las vistas con flash(mensaje, categoria) #}
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+        <div class="alertas" role="status">
+            {% for categoria, mensaje in mensajes %}
+            <div class="alerta alerta--{{ categoria }}">
+                <span>{{ mensaje }}</span>
+                <button type="button" class="alerta__cerrar" aria-label="Cerrar mensaje">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block body %}
+        {% endblock %}
+    </main>
+
+    <footer class="pie">
+        <div class="contenedor pie__contenido">
+            <p>&copy; {{ anio_actual }} {{ nombre_app }} · Proyecto académico desarrollado con Flask {{ version_flask }} y Python</p>
+            <p>Base de datos: <strong>{{ nombre_motor_bd }}</strong></p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

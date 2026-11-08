@@ -1,0 +1,40 @@
+{% extends './layout.html' %}
+{% from 'macros.html' import campo, icono %}
+
+{% block title %}{{ data.titulo }}{% endblock %}
+
+{% block body %}
+<div class="encabezado-pagina">
+    <div>
+        <p class="etiqueta">Formulario POST + redirección</p>
+        <h1>Contacto</h1>
+        <p class="texto-suave">
+            Al enviar el formulario, la vista valida los datos y redirige a la URL dinámica
+            <code>/contacto/&lt;nombre&gt;/&lt;int:edad&gt;</code> creada en el video.
+        </p>
+    </div>
+</div>
+
+<section class="tarjeta formulario-angosto">
+    <form class="formulario" method="post" action="{{ url_for('principal.contacto_formulario') }}" novalidate>
+        {{ formulario.hidden_tag() }}
+        <div class="formulario__fila">
+            {{ campo(formulario.nombre, 'Solo letras y espacios (por ejemplo, Karen).') }}
+            {{ campo(formulario.edad, 'Número entero entre 1 y 120.') }}
+        </div>
+        <div class="acciones">
+            <button type="submit" class="boton boton--primario">{{ icono('enviar') }} {{ formulario.enviar.label.text }}</button>
+        </div>
+    </form>
+</section>
+
+<section class="tarjeta formulario-angosto">
+    <h2>Pruebe la URL directamente</h2>
+    <ul class="lista-enlaces">
+        <li><a href="{{ url_for('principal.contacto', nombre='Oscar', edad=28) }}">/contacto/Oscar/28</a></li>
+        <li><a href="{{ url_for('principal.contacto', nombre='Karen', edad=31) }}">/contacto/Karen/31</a></li>
+        <li><a href="{{ url_for('principal.contacto', nombre='Pedro', edad=17) }}">/contacto/Pedro/17</a></li>
+        <li><a href="/contacto/Pedro">/contacto/Pedro</a> <span class="texto-suave">(falta la edad: error 404)</span></li>
+    </ul>
+</section>
+{% endblock %}
